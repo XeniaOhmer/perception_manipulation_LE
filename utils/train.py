@@ -378,10 +378,6 @@ def load_data(input_shape, dataset='3D-shapes', normalize=True,
         train_data = train_data - mean
         test_data = test_data - mean
 
-
-
-
-
     if analysis_run:
         X = test_data
         Y = test_labels
