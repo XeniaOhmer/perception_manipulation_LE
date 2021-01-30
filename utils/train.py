@@ -374,7 +374,7 @@ def load_data(input_shape, dataset='3D-shapes', normalize=True,
         # may be worth diving into
         if abs( np.mean(mean) - np.mean(train_data) ) > 1e-3:
             raise ValueError("results of mean calculation suspicious, please double check before continuing")
-        print('channel means = ' + str(mean) + ', data mean = ' + str(np.mean(train_data)))
+        # print('channel means = ' + str(mean) + ', data mean = ' + str(np.mean(train_data)))
         train_data = train_data - mean
         test_data = test_data - mean
 
