@@ -28,9 +28,7 @@ class ModelTrainer:
             self.fit_func = model.fit
         else:
             self.fit_func = fit_func
-        # making the assumption here that train_input is either a 2-d tuple of
-        # form (x,y) or a generator, in which case any label smoothing should be
-        # managed within the generator itself rather than with the sfunc parameter
+        
         if sfunc is not None and isinstance(train_input,tuple):
             self.meta['smoothf_args'] = func_args
             train_y = transform_labels(train_input[1], sfunc, **func_args)
@@ -58,7 +56,7 @@ class ModelTrainer:
     def evaluate_model(self, test_x, test_y, **args):
         if args is not None:
             predictions = self.model.predict(test_x, **args)
-            self.report = classification_report(test_y.argmax(axis=1),                                                predictions.argmax(axis=1),
+            self.report = classification_report(test_y.argmax(axis=1), 
                                                 predictions.argmax(axis=1),
                                                 target_names=self.class_names)
             self.c_matrix = confusion_matrix(test_y.argmax(axis=1),
@@ -69,8 +67,6 @@ class ModelTrainer:
             self.c_matrix = confusion_matrix(test_y.argmax(axis=1),
                                              predictions.argmax(axis=1))
     
-    # should be updated to save weights in hdf5, or point to checkpoint file optionally
-    # using pickle will be inefficient for saving the model itself
     def save_modelinfo(self, filepath):
         with open(filepath) as f:
             pickle.dump(self,f)
