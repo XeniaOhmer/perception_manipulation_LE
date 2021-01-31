@@ -1,12 +1,7 @@
-import tensorflow as tf
-import numpy as np
 from utils.train import load_data
-
 from communication_game.utils.referential_data import *
 from communication_game.utils.config import *
 from communication_game.nn.agents import *
-
-from scipy.stats import spearmanr
 from scipy.spatial.distance import pdist, squareform
 import matplotlib.pyplot as plt
 
@@ -34,6 +29,13 @@ layer_name = {0: 'dense_2',
 
 
 def class_similarity_matrix(features, n_examples, n_classes=64):
+    """ calculates matrix with pairwise object (class) similarities
+
+    :param features:    CNN features extracted for objects, sorted by class (first n_examples belong to class 0 etc)
+    :param n_examples:  number of examples per class
+    :param n_classes:   number of classes
+    :return:            matrix with pairwise class similarities, entry i,j is similarity between class i and class j
+    """
     
     similarity = 1 - pdist(features, metric='cosine')
     similarity = squareform(similarity)
@@ -47,7 +49,13 @@ def class_similarity_matrix(features, n_examples, n_classes=64):
     return sim_matrix
 
 
-def featurewise_similarity(similarity_matrix): 
+def featurewise_similarity(similarity_matrix):
+    """ calculate similarities to other classes sharing the same feature value for either color, size or shape
+
+    :param similarity_matrix: similarity matrix as calculated with class_similarity_matrix
+    :return: for each class, similarities with respect to other classes sharing the same feature for either color
+             size or shape --> dimensionality is [n_classes, n_features], here [64,3]
+    """
     
     similarities = np.zeros((n_classes, 3))
     
@@ -74,7 +82,13 @@ def featurewise_similarity(similarity_matrix):
     return similarities
 
 
-def featurewise_dissimilarity(similarity_matrix): 
+def featurewise_dissimilarity(similarity_matrix):
+    """ calculate similarities to other classes NOT sharing the same feature value for either color, size or shape
+
+        :param similarity_matrix: similarity matrix as calculated with class_similarity_matrix
+        :return:    for each class, similarities with respect to other classes NOT sharing the same feature for either
+                    color size or shape --> dimensionality is [n_classes, n_features], here [64,3]
+        """
     
     similarities = np.zeros((n_classes, 3))
     similarities_all = np.zeros((n_classes, 3))
@@ -109,6 +123,7 @@ def featurewise_dissimilarity(similarity_matrix):
 
 
 def show_vision_modules_similarities(cnn_keys, n_examples=50, layer=1, plot=True, print_sim=True, path='../../'):
+    """ Calculate vision module biases for each feature, and plot the similarity matrices. """
     
     if not plot:
         sim_matrices = []
