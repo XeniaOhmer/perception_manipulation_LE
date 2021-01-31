@@ -35,7 +35,7 @@ def get_stats(name, vocab_size, message_length, path, mode, n_vision, n_runs=1):
     return rewards, val_rewards, eval_dicts, message_dicts
 
 
-def groundedness_dataframe(names, vocab_size, message_length, path='./', n_vision=1, n_runs=1):
+def groundedness_dataframe(names, vocab_size, message_length, path='3Dshapes_subset/', n_vision=1, n_runs=1):
 
     run_names = []
     features = []
@@ -78,7 +78,7 @@ def groundedness_dataframe(names, vocab_size, message_length, path='./', n_visio
     return df
 
 
-def show_results_multiples(names, vocab_size, message_length, ylim=(0.8, 1.01), path='./', mode='basic', n_vision=1,
+def show_results_multiples(names, vocab_size, message_length, ylim=(0.8, 1.01), path='3Dshapes_subset/', mode='basic', n_vision=1,
                            subplots=(1, 4), n_runs=5, n_shards=2, figsize=(15, 3.5)):
     
     fig = plt.figure(figsize=figsize)
@@ -136,7 +136,7 @@ def show_results_multiples(names, vocab_size, message_length, ylim=(0.8, 1.01), 
     fig.tight_layout()
     
 
-def show_accuracies(names, vocab_size, message_length, path='./', mode='basic', n_runs=5, n_vision=1):
+def show_accuracies(names, vocab_size, message_length, path='3Dshapes_subset/', mode='basic', n_runs=5, n_vision=1):
     
     all_zero_shots = []
     for name in names: 
@@ -164,7 +164,7 @@ def show_accuracies(names, vocab_size, message_length, path='./', mode='basic', 
         print(ttest_ind(all_zero_shots[0], all_zero_shots[-1]))
             
             
-def show_results(names, vocab_size, message_length, ylim=(0.8, 1.01), path='./', mode='basic',
+def show_results(names, vocab_size, message_length, ylim=(0.8, 1.01), path='3Dshapes_subset/', mode='basic',
                  n_vision=1, subplots=(1, 4)):
     
     for plot_index, name in enumerate(names): 
@@ -217,7 +217,7 @@ def show_results(names, vocab_size, message_length, ylim=(0.8, 1.01), path='./',
 def show_messages(names, 
                   vocab_size, 
                   message_length, 
-                  path='./',
+                  path='3Dshapes_subset/',
                   mode='basic', 
                   n_vision=1,
                   dataset='3Dshapes'):
@@ -262,7 +262,7 @@ def show_messages(names,
                         print(*line)
 
 
-def show_topsims(names, vocab_size, message_length, path='./', mode='basic', n_vision=1, n_runs=1):
+def show_topsims(names, vocab_size, message_length, path='3Dshapes_subset/', mode='basic', n_vision=1, n_runs=1):
     
     all_topsims_am = []
     
@@ -297,7 +297,7 @@ def show_topsims(names, vocab_size, message_length, path='./', mode='basic', n_v
     print(ttest_ind(all_topsims_am[0], all_topsims_am[-1]))
 
 
-def show_rsas(names, vocab_size, message_length, path='./', mode='basic', n_vision=1, n_runs=1): 
+def show_rsas(names, vocab_size, message_length, path='3Dshapes_subset/', mode='basic', n_vision=1, n_runs=1): 
     
     print('RSA')
     for name in names:
@@ -325,7 +325,7 @@ def show_rsas(names, vocab_size, message_length, path='./', mode='basic', n_visi
                   ', sender-receiver', str(rsa_sr) + '+-' + str(rsa_sr_std))
 
 
-def show_groundedness_all(names, vocab_size, message_length, path='./', mode='basic', n_vision=1, n_runs=1): 
+def show_groundedness_all(names, vocab_size, message_length, path='3Dshapes_subset/', mode='basic', n_vision=1, n_runs=1): 
     
     print('groundedness')
     for name in names:
@@ -339,7 +339,7 @@ def show_groundedness_all(names, vocab_size, message_length, path='./', mode='ba
             print('bosground', evals[run]['bosground'])
 
 
-def show_groundedness(names, vocab_size, message_length, path='./', mode='basic', n_vision=1, n_runs=1): 
+def show_groundedness(names, vocab_size, message_length, path='3Dshapes_subset/', mode='basic', n_vision=1, n_runs=1): 
     
     print('groundedness')
     for name in names:
@@ -394,7 +394,7 @@ def get_eval_dict(names, vocab_size, message_length, path='./', mode='basic', n_
             return eval_dicts
             
 
-def show_acquisition_speed(names, vocab_size, message_length, thresholds = [0.87, 0.9, 0.93], path='./',
+def show_acquisition_speed(names, vocab_size, message_length, thresholds = [0.87, 0.9, 0.93], path='3Dshapes_subset/',
                            mode='basic', n_runs=1):
     
     print("acquisition speed")
@@ -448,7 +448,7 @@ def show_acquisition_speed(names, vocab_size, message_length, thresholds = [0.87
                   ", val", str(mean_val) + '+-' + str(std_val))
 
 
-def ttests(name1, name2, vocab_size=4, message_length=3, path='./', mode='basic', n_vision=1, n_runs=10):
+def ttests(name1, name2, vocab_size=4, message_length=3, path='3Dshapes_subset/', mode='basic', n_vision=1, n_runs=10):
     
     R1, valR1, eval1, _ = get_stats(name1, vocab_size, message_length, path, mode, n_vision, n_runs=n_runs)
     R2, valR2, eval2, _ = get_stats(name2, vocab_size, message_length, path, mode, n_vision, n_runs=n_runs)

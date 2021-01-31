@@ -10,10 +10,8 @@ from scipy.stats import spearmanr
 from scipy.spatial.distance import pdist, squareform
 import matplotlib.pyplot as plt
 
-path_prefix = '/net/store/cogmod/users/xenohmer/PycharmProjects/SimilarityGames/'
-
 dataset = '3Dshapes_subset'
-all_cnn_paths, image_dim, n_classes, feature_dims, zero_shot_cats, _ = get_config(dataset)
+all_cnn_paths, image_dim, n_classes, feature_dims, zero_shot_cats = get_config(dataset)
 layer_name = {0: 'dense_2', 1: 'dense_1', 2: 'dense', 3: 'conv2d_1', 4: 'conv2d', 5: 'conv2d_input'}
 
 
@@ -110,14 +108,14 @@ def featurewise_dissimilarity(similarity_matrix):
     return similarities, similarities_all
 
 
-def show_vision_modules_similarities(cnn_keys, n_examples=50, layer=1, plot=True, print_sim=True):
+def show_vision_modules_similarities(cnn_keys, n_examples=50, layer=1, plot=True, print_sim=True, path='../../'):
     
     if not plot:
         sim_matrices = []
         
     for cnn_key in cnn_keys: 
         path_vision = all_cnn_paths[cnn_key]
-        vision = tf.keras.models.load_model(path_prefix + path_vision)
+        vision = tf.keras.models.load_model(path + path_vision)
         vision = tf.keras.Model(inputs=vision.input, outputs=vision.get_layer(layer_name[layer]).output)
         
         val_data, val_labels, _ = load_data((64, 64, 3),
