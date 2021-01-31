@@ -60,6 +60,9 @@ parser.add_argument("--representation_depth", type=int, default=1,
                     help="CNN layer for vision module output, 0=softmax, 1=penultimate, 2=second to last")
 parser.add_argument("--n_shards", type=int, default=2,
                     help="number of shards for the dataset, to be used under RAM constraints")
+parser.add_argument("--project_path", type=str, default='../',
+                    help="absolute project path is necessary for storing agent weights, else there is a tensorflow "
+                         "error")
 args = parser.parse_args()
 
 run = args.run
@@ -114,7 +117,7 @@ params = {"batch_size": batch_size,
           "noise_prob": noise_prob,
           "representation_depth": representation_depth}
 
-path_prefix = '../'
+path_prefix = args.project_path
 path = (path_prefix + 'communication_game/results/' + dataset + '/' + str(mode) + '/' + str(run)+'/' +
         'vs' + str(vocab_size) + '_ml' + str(message_length) + '/')
 
@@ -253,18 +256,17 @@ for epoch in range(n_epochs):
                                                                                        shard,
                                                                                        rewards,
                                                                                        val_reward))
-    # store final agent models
-    if epoch == n_epochs-1:
-        for r, receiver in enumerate(trainer.receivers):
-            if len(trainer.receivers) > 0:
-                receiver.save_weights(path + 'receiver' + str(r) + '_weights_epoch' + str(epoch) + '/')
-            else: 
-                receiver.save_weights(path + 'receiver_weights_epoch' + str(epoch) + '/')
-        for s, sender in enumerate(trainer.senders):
-            if len(trainer.senders) > 0: 
-                sender.save_weights(path + 'sender' + str(s) + '_weights_epoch' + str(epoch) + '/')
-            else: 
-                sender.save_weights(path + 'sender_weights_epoch' + str(epoch) + '/')
+# store final agent models
+for r, receiver in enumerate(trainer.receivers):
+    if len(trainer.receivers) > 1:
+        receiver.save_weights(path + 'receiver' + str(r) + '_weights_epoch' + str(epoch) + '/')
+    else:
+        receiver.save_weights(path + 'receiver_weights_epoch' + str(epoch) + '/')
+for s, sender in enumerate(trainer.senders):
+    if len(trainer.senders) > 1:
+        sender.save_weights(path + 'sender' + str(s) + '_weights_epoch' + str(epoch) + '/')
+    else:
+        sender.save_weights(path + 'sender_weights_epoch' + str(epoch) + '/')
 
 np.save(path + 'reward.npy', all_reward)
 np.save(path + 'length.npy', all_length)
@@ -279,7 +281,6 @@ np.save(path + 'val_reward.npy', all_val_reward)
 # get validation data and messages
 (train_data, train_labels), (val_data, val_labels), _, _ = load_data((image_dim, image_dim, 3),
                                                                      dataset='3D-shapes', balance_type=2)
-print("data for language analysis loaded")
 
 if zero_shot:
     (train_data, train_labels), (zs_targets, zs_labels) = make_zero_shot_data(
