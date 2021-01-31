@@ -348,9 +348,6 @@ for s, sender in enumerate(trainer.senders):
         zero_shot_test = make_zero_shot_referential_data((train_data, train_labels),
                                                          (zs_targets, zs_labels),
                                                          n_distractors=n_distractors)
-        if n_distractors == 2: 
-            zero_shot_test = pickle.load(open(
-                path_prefix + 'communication_game/' + dataset + '_shards/zero_shot_referential_data.pkl','rb'))
         
         if len(zero_shot_test[0]) % batch_size == 1:
             zero_shot_test[0] = zero_shot_test[0][:-1]
