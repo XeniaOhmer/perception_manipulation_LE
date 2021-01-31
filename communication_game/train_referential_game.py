@@ -1,5 +1,3 @@
-import numpy as np
-import tensorflow as tf
 from tensorflow.keras import models
 import sys
 sys.path.append('/net/store/cogmod/users/xenohmer/PycharmProjects/SimilarityGames/')
@@ -12,40 +10,58 @@ import os
 import pickle
 import argparse
 import logging
-import h5py
 from utils.train import load_data
 
-print("os", os.getcwd())
-
-path_prefix = '../'
+###################################################
+# initialize and save model and training parameters
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--activation", type=str, default='tanh')
-parser.add_argument("--hidden_dim", type=int, default=128)
-parser.add_argument("--embed_dim", type=int, default=128)
-parser.add_argument("--vocab_size", type=int, default=4)
-parser.add_argument("--message_length", type=int, default=3)
-parser.add_argument("--entropy_coeff_sender", type=float, default=0.02)
-parser.add_argument("--entropy_coeff_receiver", type=float, default=0.02)
-parser.add_argument("--n_epochs", type=int, default=150)
-parser.add_argument("--batch_size", type=int, default=128)
-parser.add_argument("--sim_sender",  nargs="*", type=str, default=['default'])
-parser.add_argument("--sim_receiver",  nargs="*", type=str, default=['default'])
-parser.add_argument("--sf_sender", nargs="*", type=str, default=['0-0'])
-parser.add_argument("--sf_receiver", nargs="*", type=str, default=['0-0'])
-parser.add_argument("--run", type=str, default='test0')
-parser.add_argument("--learning_rate", type=float, default=0.0005)
-parser.add_argument("--n_distractors", type=int, default=2)
-parser.add_argument("--zero_shot", type=bool, default=False)
-parser.add_argument("--mode", type=str, default='basic')
-parser.add_argument("--save_every", type=int, default=10)
-parser.add_argument("--noise_prob", type=float, default=0.)
-parser.add_argument("--train_vision_sender", type=bool, default=False)
-parser.add_argument("--train_vision_receiver", type=bool, default=False)
-parser.add_argument("--dataset", type=str, default='3Dshapes_subset')
-parser.add_argument("--representation_depth", type=int, default=1)
-parser.add_argument("--n_shards", type=int, default=2)
+parser.add_argument("--activation", type=str, default='tanh',
+                    help='activation function of vision to hidden layer')
+parser.add_argument("--hidden_dim", type=int, default=128,
+                    help="hidden dimension of recurrent layer")
+parser.add_argument("--embed_dim", type=int, default=128,
+                    help="dimension of embedding layer")
+parser.add_argument("--vocab_size", type=int, default=4,
+                    help="vocabulary size")
+parser.add_argument("--message_length", type=int, default=3,
+                    help="maximal messsage length")
+parser.add_argument("--entropy_coeff_sender", type=float, default=0.02,
+                    help="entropy coefficient for sender, encourages exploration")
+parser.add_argument("--entropy_coeff_receiver", type=float, default=0.02,
+                    help="entropy coefficient for receiver, encourages exploration")
+parser.add_argument("--n_epochs", type=int, default=150,
+                    help="number of epochs for training")
+parser.add_argument("--batch_size", type=int, default=128,
+                    help="batch size")
+parser.add_argument("--sim_sender",  nargs="*", type=str, default=['default'],
+                    help="sender bias in {'default', 'color', 'shape', 'scale', 'all'}, multiple senders are possible")
+parser.add_argument("--sim_receiver",  nargs="*", type=str, default=['default'],
+                    help="receiver bias in {'default', 'color', 'shape', 'scale', 'all'}, multiple rec. are possible")
+parser.add_argument("--sf_sender", nargs="*", type=str, default=['0-0'],
+                    help="smoothing factors for the sender vision modules")
+parser.add_argument("--sf_receiver", nargs="*", type=str, default=['0-0'],
+                    help="smoothing factors for the receiver vision module")
+parser.add_argument("--run", type=str, default='test0',
+                    help="name of current run, for saving results")
+parser.add_argument("--learning_rate", type=float, default=0.0005,
+                    help="learning rate")
+parser.add_argument("--n_distractors", type=int, default=2,
+                    help="number of distractors for the receiver")
+parser.add_argument("--zero_shot", type=bool, default=False,
+                    help="whether zero shot run or not, if True agents are trained on subset of the data and tested"
+                         "on the remaining (novel) items")
+parser.add_argument("--mode", type=str, default='basic',
+                    help="folder of the current simulation for storing the results")
+parser.add_argument("--noise_prob", type=float, default=0.,
+                    help="probability that words of the sender are replaced by random other words (not used in paper)")
+parser.add_argument("--dataset", type=str, default='3Dshapes_subset',
+                    help="which data set to use, only one implemented here")
+parser.add_argument("--representation_depth", type=int, default=1,
+                    help="CNN layer for vision module output, 0=softmax, 1=penultimate, 2=second to last")
+parser.add_argument("--n_shards", type=int, default=2,
+                    help="number of shards for the dataset, to be used under RAM constraints")
 args = parser.parse_args()
 
 run = args.run
@@ -66,13 +82,11 @@ sf_sender = args.sf_sender
 sf_receiver = args.sf_receiver
 zero_shot = args.zero_shot
 mode = args.mode
-save_every = args.save_every
 noise_prob = args.noise_prob
 representation_depth = args.representation_depth
 dataset = args.dataset
 
 n_shards = args.n_shards
-
 
 length_cost = 0
 grad_norm = None
@@ -81,20 +95,48 @@ layer_name = {0: 'dense_2',
               1: 'dense_1',
               2: 'dense'}
 
-# load pretrained model
+params = {"batch_size": batch_size,
+          "similarity_sender": sim_sender,
+          "similarity_receiver": sim_receiver,
+          "smoothing_factor_sender": sf_sender,
+          "smoothing_factor_receiver": sf_receiver,
+          "hidden_dim": hidden_dim,
+          "embed_dim": embed_dim,
+          "vocab_size": vocab_size,
+          "message_length": message_length,
+          "entropy_coeff_sender": entropy_coeff_sender,
+          "entropy_coeff_receiver": entropy_coeff_receiver,
+          "length_cost": length_cost,
+          "grad_norm": grad_norm,
+          "learning_rate": learning_rate,
+          "n_distractors": n_distractors,
+          "activation": activation,
+          "entropy_annealing": entropy_annealing,
+          "zero_shot": zero_shot,
+          "noise_prob": noise_prob,
+          "representation_depth": representation_depth}
 
-all_cnn_paths, image_dim, n_classes, feature_dims, zero_shot_cats = get_config(dataset)
-
+path_prefix = '../'
 path = (path_prefix + 'communication_game/results/' + dataset + '/' + str(mode) + '/' + str(run)+'/' +
         'vs' + str(vocab_size) + '_ml' + str(message_length) + '/')
+
+if not os.path.exists(path):
+    os.makedirs(path)
+
+with open(path + 'params.pkl', 'wb') as handle:
+    pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+###################################################
+# load pretrained CNNs to be used as vision modules
+
+all_cnn_paths, image_dim, n_classes, feature_dims, zero_shot_cats = get_config(dataset)
 
 n_senders = len(sim_sender)
 n_receivers = len(sim_receiver)
 cnn_paths_sender = [all_cnn_paths[sim_sender[i] + sf_sender[i]] for i in range(n_senders)]
 cnn_paths_receiver = [all_cnn_paths[sim_receiver[i] + sf_receiver[i]] for i in range(n_receivers)]
 
-print("path prefix", path_prefix + cnn_paths_sender[0])
-test = models.load_model(path_prefix + cnn_paths_sender[0])
 cnns_sender = [models.load_model(path_prefix + cnn_paths_sender[i]) for i in range(n_senders)]
 vision_modules_sender = [tf.keras.Model(inputs=cnns_sender[i].input,
                                         outputs=cnns_sender[i].get_layer(layer_name[representation_depth]).output)
@@ -105,6 +147,8 @@ vision_modules_receiver = [tf.keras.Model(inputs=cnns_receiver[i].input,
                                           outputs=cnns_receiver[i].get_layer(layer_name[representation_depth]).output)
                            for i in range(n_receivers)]
 
+
+###################################################
 # initialize sender, receiver and training classes
 
 senders = [Sender(vocab_size + 1, message_length, embed_dim, hidden_dim, activation=activation,
@@ -123,6 +167,8 @@ trainer = Trainer(senders, receivers,
                   receiver_lr=learning_rate, 
                   noise_prob=noise_prob)
 
+
+###################################################
 # training
 
 all_reward = []
@@ -130,34 +176,6 @@ all_length = []
 all_sender_loss = []
 all_receiver_loss = []
 all_val_reward = []
-
-params = {"batch_size": batch_size,
-          "similarity_sender": sim_sender, 
-          "similarity_receiver": sim_receiver,  
-          "smoothing_factor_sender": sf_sender,
-          "smoothing_factor_receiver": sf_receiver,
-          "hidden_dim": hidden_dim,
-          "embed_dim": embed_dim,
-          "vocab_size": vocab_size,
-          "message_length": message_length,
-          "entropy_coeff_sender": entropy_coeff_sender,
-          "entropy_coeff_receiver": entropy_coeff_receiver,
-          "length_cost": length_cost,
-          "grad_norm": grad_norm,
-          "learning_rate": learning_rate,
-          "n_distractors": n_distractors,
-          "activation": activation,
-          "entropy_annealing": entropy_annealing, 
-          "zero_shot": zero_shot,
-          "noise_prob": noise_prob,
-          "representation_depth": representation_depth}
-
-if not os.path.exists(path):
-    os.makedirs(path)
-
-with open(path + 'params.pkl', 'wb') as handle:
-    pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
     
 logging.basicConfig(filename=path + "log_file.txt",
                     level=logging.DEBUG,
@@ -170,12 +188,10 @@ if zero_shot:
 else:
     zero_shot_categories = []
                                                                  
-
+# load data
 (train_data, train_labels), (val_data, val_labels), _, _ = load_data((image_dim, image_dim, 3),
                                                                      dataset='3D-shapes',
                                                                      balance_type=2)
-
-print("train data created")
 
 if zero_shot: 
     (train_data, train_labels), _ = make_zero_shot_data(train_data,
@@ -186,12 +202,8 @@ if zero_shot:
                                                     zero_shot_categories=zero_shot_categories)
 
 shard_size = len(train_data) // n_shards
-print(shard_size)
 
-print("zero shot and val data created")
-
-import matplotlib.pyplot as plt
-
+# each epoch train and valdidate the agents
 for epoch in range(n_epochs):
 
     for shard in range(n_shards):
@@ -202,17 +214,6 @@ for epoch in range(n_epochs):
             n_distractors=n_distractors,
             zero_shot_categories=zero_shot_categories
         )
-
-        plt.imshow(sender_in[0])
-        plt.show()
-        plt.imshow(receiver_in[0][0])
-        plt.show()
-        plt.imshow(receiver_in[0][1])
-        plt.show()
-        plt.imshow(receiver_in[0][2])
-        plt.show()
-
-        print('referential train data created ')
         
         train_dataset = tf.data.Dataset.from_tensor_slices((sender_in, receiver_in, referential_labels))
 
@@ -224,8 +225,6 @@ for epoch in range(n_epochs):
         train_dataset = train_dataset.batch(batch_size)
         
         rewards, mean_length, sender_loss, receiver_loss = trainer.train_epoch(train_dataset)
-
-        print("epoch trained")
 
         trainer.entropy_coeff_receiver = trainer.entropy_coeff_receiver * entropy_annealing
         trainer.entropy_coeff_sender = trainer.entropy_coeff_sender * entropy_annealing
@@ -246,21 +245,17 @@ for epoch in range(n_epochs):
         del receiver_in
         del referential_labels
 
-        print("referential val data created")
-
         # evaluate validation accuracy
         val_dataset = val_dataset.batch(batch_size)
         val_reward = trainer.evaluate(val_dataset)
         all_val_reward.append(val_reward)
-
         del val_dataset
-        print("evaluated")
 
         logging.info("epoch {0}, shard {1}, rewards train {2}, rewards val {3}".format(epoch,
                                                                                        shard,
                                                                                        rewards,
                                                                                        val_reward))
-
+    # store final agent models
     if epoch == n_epochs-1:
         for r, receiver in enumerate(trainer.receivers):
             if len(trainer.receivers) > 0:
@@ -279,6 +274,9 @@ np.save(path + 'sender_loss.npy', all_sender_loss)
 np.save(path + 'receiver_loss.npy', all_receiver_loss)
 np.save(path + 'val_reward.npy', all_val_reward)
 
+
+#############################################################
+# evaluate language with different metrics and store results
 
 # get validation data and messages
 (train_data, train_labels), (val_data, val_labels), _, _ = load_data((image_dim, image_dim, 3),
@@ -305,12 +303,11 @@ for i in range(n_classes):
 selected_indices = np.array(selected_indices)
 
 
-# calculate topographic similarities for selected labels
-                                                         
+# calculate topographic similarities, groundedness, and RSA  for selected labels
 for s, sender in enumerate(trainer.senders):
     
     if len(trainer.senders) > 1:
-        save_addition= str(s)
+        save_addition = str(s)
     else:
         save_addition = ''
     
@@ -335,7 +332,6 @@ for s, sender in enumerate(trainer.senders):
                                           list(messages.numpy()[selected_indices]))
 
     # save all in evaluation dict
-
     eval_dict = {'message_length': np.mean(message_length),
                  'entropy': np.mean(entropy),
                  'topsim_attributes_features': similarities[0],
@@ -349,7 +345,6 @@ for s, sender in enumerate(trainer.senders):
                  }
 
     # evaluation zero-shot
-
     if zero_shot:
         zero_shot_test = make_zero_shot_referential_data((train_data, train_labels),
                                                          (zs_targets, zs_labels),
@@ -378,7 +373,6 @@ for s, sender in enumerate(trainer.senders):
         pickle.dump(eval_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # evaluation messages
-                                                         
     message_dict = {}
     sender_out, _, _, _, _ = sender.forward(sender_in, training=False)
     indices = []
