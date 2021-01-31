@@ -57,7 +57,7 @@ def groundedness_dataframe(names, vocab_size, message_length, path='./', n_visio
 
                 if mode == 'mixed':
                     both_agents = name.split('_')
-                    run_name = [both_agents[i] for i in range(2) if both_agents[i]!='default'][0]
+                    run_name = [both_agents[i] for i in range(2) if both_agents[i] != 'default'][0]
                     if run_name == 'scale':
                         run_name = 'size'
                     run_names.append(run_name)

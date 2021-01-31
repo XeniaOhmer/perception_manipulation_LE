@@ -5,7 +5,14 @@ import editdistance  # https://pypi.org/project/editdistance/
 from communication_game.utils.config import get_attribute_dict, get_feature_information 
 
 
-def labels_to_attributes(labels, dataset='3Dshapes'):
+def labels_to_attributes(labels, dataset='3Dshapes_subset'):
+    """ translates between object labels (so classes) and the corresponding class-defining attributes
+
+    :param labels: object label (non-hot)
+    :param dataset: dataset
+    :return:    returns a list containing the attributes for each object class as a k-hot vector
+                see communication_game.config.py
+    """
     
     attribute_dict = get_attribute_dict(dataset)
     
@@ -13,6 +20,7 @@ def labels_to_attributes(labels, dataset='3Dshapes'):
 
 
 class CorrelatedPairwiseSimilarity:
+    """ Base class for calculating topographic similarity and RSA."""
     
     def __init__(self):
         pass
@@ -34,12 +42,7 @@ class CorrelatedPairwiseSimilarity:
     
 
 class TopographicSimilarity(CorrelatedPairwiseSimilarity):
-    # calculates the topographic similarity between sender_input and messages
-    # topographic similarity a quantitative proxy for compositionality: https://arxiv.org/pdf/2004.09124.pdf
-    # (but has also been criticized)
-    # basic functionality: calculate the similarities between all input samples, calculate the similarities between all
-    #                      messages, and correlate the corresponding similarities
-    #                      (essentially very similar to Representation Similarity Analysis)
+    """ Calculates the topographic similarity between sender_input and messages."""
 
     def __init__(self):
         super().__init__()
@@ -62,7 +65,10 @@ class TopographicSimilarity(CorrelatedPairwiseSimilarity):
                 self.feature_message_topsim(features, messages)]
     
 
-class RSA(CorrelatedPairwiseSimilarity): 
+class RSA(CorrelatedPairwiseSimilarity):
+    """ Calculates the representational similarity analysis score for all pairwise combinations of sender space,
+    receiver space, and input space. Calculation is essentially the same as for topographic similarity.
+    """
     
     def __init__(self, sender, receiver, dist=distance.cosine):
         super().__init__()
@@ -74,16 +80,13 @@ class RSA(CorrelatedPairwiseSimilarity):
         
         messages, _, _, _, hidden_sender = self.sender.forward(images, training=False)
         RSA_sender_input = self.compute_similarity(attributes, hidden_sender, self.distance, self.distance)
-        
         hidden_receiver = self.receiver.language_module(messages)
         RSA_receiver_input = self.compute_similarity(attributes, hidden_receiver, self.distance, self.distance)
-        
         RSA_sender_receiver = self.compute_similarity(hidden_sender, hidden_receiver, self.distance, self.distance)
-        
         return RSA_sender_input, RSA_receiver_input, RSA_sender_receiver
     
     def get_all_RSAs_precalc(self, attributes, hidden_sender, messages): 
-        
+
         RSA_sender_input = self.compute_similarity(attributes, hidden_sender, self.distance, self.distance)
         hidden_receiver = self.receiver.language_module(messages)
         RSA_receiver_input = self.compute_similarity(attributes, hidden_receiver, self.distance, self.distance)
@@ -92,13 +95,13 @@ class RSA(CorrelatedPairwiseSimilarity):
         
 
 class Groundedness:
-    # Calculates whether the language is grounded in the attributes of the objects.
-    #
-    # The measure can be calculated for individual tokens, or for the entire language see:
-    # https://people.eecs.berkeley.edu/~nicholas_tomlin/research/papers/ugrad-thesis.pdf
-    # In addition we also measure to what degree the language is grounded in what attribute:
-    # This is calculated by the frequency with which symbols that are grounded in the different 
-    # TYPES of attributes 
+    """ Calculates whether the language is grounded in the attributes of the objects.
+        The measure can be calculated for individual tokens, or for the entire language see:
+        https://people.eecs.berkeley.edu/~nicholas_tomlin/research/papers/ugrad-thesis.pdf
+
+        In addition we also measure to what degree the language is grounded in what feature:
+        This is calculated by the frequency with which symbols that are grounded in the different
+        TYPES of attributes (color, shape, or size)"""
     
     def __init__(self, dataset, vocab_size):
         super().__init__()
@@ -111,7 +114,7 @@ class Groundedness:
         self.vocab_size = vocab_size
 
     def compute_bos_groundedness(self, messages, attributes):
-        """ Bag-of-symbol groundedness.
+        """ Bag-of-symbol groundedness. <-- This is the metric reported in the paper
         
         For each symbol check with which attribute it co-occurs most frequently, 
         and calculate the frequency with which they co-occur. Normalize to get a measure 
@@ -169,8 +172,7 @@ class Groundedness:
         return groundings
 
     def compute_pos_groundedness(self, messages, attributes):
-        """ Positional groundedness. 
-        
+        """ Positional groundedness.
         Same as bag-of-symbol groundedness but for each position in the message separately."""
         
         message_length = messages.shape[1]

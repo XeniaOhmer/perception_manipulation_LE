@@ -1,6 +1,4 @@
 from tensorflow.keras import models
-import sys
-sys.path.append('/net/store/cogmod/users/xenohmer/PycharmProjects/SimilarityGames/')
 from communication_game.utils.referential_data import *
 from communication_game.utils.config import *
 from communication_game.nn.agents import *
@@ -43,7 +41,7 @@ parser.add_argument("--sf_sender", nargs="*", type=str, default=['0-0'],
                     help="smoothing factors for the sender vision modules")
 parser.add_argument("--sf_receiver", nargs="*", type=str, default=['0-0'],
                     help="smoothing factors for the receiver vision module")
-parser.add_argument("--run", type=str, default='test0',
+parser.add_argument("--run", type=str, default='test',
                     help="name of current run, for saving results")
 parser.add_argument("--learning_rate", type=float, default=0.0005,
                     help="learning rate")

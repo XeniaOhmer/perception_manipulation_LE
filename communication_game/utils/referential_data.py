@@ -2,6 +2,8 @@ import numpy as np
 
 
 def make_referential_data(data_set, n_distractors=2, zero_shot_categories=[]):
+    """ create sender and receiver training input for referential game, if zero shot is True, call
+        make_zero_shot_data before. """
     
     if len(data_set) == 2: 
         targets_sender, target_labels = data_set
@@ -61,6 +63,8 @@ def make_referential_data(data_set, n_distractors=2, zero_shot_categories=[]):
 
 
 def make_zero_shot_data(sender_data_orig, train_labels_orig, zero_shot_categories=[], receiver_data_orig=None):
+    """ this is necessary if zero shot is True: call for training and validation set to remove all
+        objects that should be withheld for testing """
     
     train_labels_non_hot = np.argmax(train_labels_orig, axis=1)
     classical_indices = [i for i, label in enumerate(train_labels_non_hot) 
@@ -82,6 +86,8 @@ def make_zero_shot_data(sender_data_orig, train_labels_orig, zero_shot_categorie
 def make_zero_shot_referential_data(dataset, 
                                     zero_shot_dataset, 
                                     n_distractors=2):
+    """ given dataset and zero-shot dataset created in make_zero_shot_data, call this function to get the
+        referential game input for the zero-shot testing. """
 
     # get train data without zero shot targets
     
