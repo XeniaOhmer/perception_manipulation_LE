@@ -21,6 +21,7 @@ Place the '3dshapes.h5' file in the folder 'data'.
 
 ADD STUFF 
 
+All trained CNNs that were used in the paper can be found in 'trained_cnns'.
 
 The functions for analyzing the CNN similarities are under 'communication_game/utils/similarity_analysis.py'.
 
