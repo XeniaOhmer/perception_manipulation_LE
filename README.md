@@ -4,13 +4,18 @@ This code accompanies the anonymous submission
 "Manipulating perception in artificial agents to study the effects on language emergence"
 to the Annual Meeting of the Cognitive Science Society 2021.
 
-If you use the code, please cite this work. 
+All packages and versions used can be found in 'requirements.txt'.
 
 We use a setup where two agents, a sender and a receiver, play a reference game. The agents have a vision module which 
 is extracted from a pretrained CNN, and a language module which is trained during the reference game. Below you find
 details about how to do the CNN training, how to train the agents on the communication game, and where to find the 
 results and analyses presented in the paper. 
 
+
+## Data 
+
+We use the 3d shapes data set (Burgess & Kim, 2018), which you can download [here](https://console.cloud.google.com/storage/browser/3d-shapes;tab=objects?prefix=&forceOnObjectsSortingFiltering=false]).
+Place the '3dshapes.h5' file in the folder 'data'.
 
 ## CNN training 
 
@@ -42,6 +47,7 @@ defines the smoothing parameters that will be applied. The outer training loop c
 resulting in one training run per trait per smoothing factor.
 
 
+All trained CNNs that were used in the paper can be found in 'trained_cnns'.
 
 The functions for analyzing the CNN similarities are under 'communication_game/utils/similarity_analysis.py'.
 
