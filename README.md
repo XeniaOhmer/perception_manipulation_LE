@@ -4,7 +4,7 @@ This code accompanies the anonymous submission
 "Manipulating perception in artificial agents to study the effects on language emergence"
 to the Annual Meeting of the Cognitive Science Society 2021.
 
-If you use the code, please cite this work. 
+All packages and versions used can be found in 'requirements.txt'.
 
 We use a setup where two agents, a sender and a receiver, play a reference game. The agents have a vision module which 
 is extracted from a pretrained CNN, and a language module which is trained during the reference game. Below you find
