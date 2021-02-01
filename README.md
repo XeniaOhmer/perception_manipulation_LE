@@ -40,9 +40,9 @@ following the format in utils.train.load_default_model_params(). The default par
 
 Each entry in 'conv_depths' and 'fc_depths' specifies the channel dimension, with one layer resulting for each entry.
 The 'conv_pool' entry specifies whether or not to pool after each convolutional layer. For further customization with
-the GenericNet class see models/genericnet.py. Alternatively, any arbitrary keras model can be used by replacing the
+the GenericNet class see 'models/genericnet.py'. Alternatively, any arbitrary keras model can be used by replacing the
 'model' variable, provided input and output dimensions are consistent. In order to change the dataset, replace the
-load_data() function in train_cnn.py and update the 'input_shape' and 'num_classes' variables. The 'sf_list' variable
+load_data() function in 'train_cnn.py' and update the 'input_shape' and 'num_classes' variables. The 'sf_list' variable
 defines the smoothing parameters that will be applied. The outer training loop controls which traits will be enforced,
 resulting in one training run per trait per smoothing factor.
 
