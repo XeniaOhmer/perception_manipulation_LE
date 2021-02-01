@@ -12,6 +12,11 @@ details about how to do the CNN training, how to train the agents on the communi
 results and analyses presented in the paper. 
 
 
+## Data 
+
+We use the 3d shapes data set (Burgess & Kim, 2018), which you can download [here](https://console.cloud.google.com/storage/browser/3d-shapes;tab=objects?prefix=&forceOnObjectsSortingFiltering=false]).
+Place the '3dshapes.h5' file in the folder 'data'.
+
 ## CNN training 
 
 ADD STUFF 
