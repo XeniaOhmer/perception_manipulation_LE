@@ -28,7 +28,7 @@ epochs, init_lr, batch_size, verbose = config.get_default_training_config()
 epochs = 200
 
 # needs to be set to location of 3dshapes.h5 file from tensorflow 3dshapes dataset
-data_path = 'data/3dshapes.h5'
+data_path = '3dshapes.h5'
 model_params = utils.train.load_default_model_params()
 
 print("[INFO] loading data...")

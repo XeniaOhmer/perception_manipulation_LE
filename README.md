@@ -14,7 +14,33 @@ results and analyses presented in the paper.
 
 ## CNN training 
 
-ADD STUFF 
+For CNN training in default mode, download data using
+
+    wget https://storage.cloud.google.com/3d-shapes/3dshapes.h5
+
+or go to https://github.com/deepmind/3d-shapes and follow the instructions from there. Provided the file '3dshapes.h5'
+is in the main directory with the train_cnn.py file, the default training experiments can be run by calling
+train_cnn.py without arguments, i.e. by running
+
+python train_cnn.py
+
+in a terminal with the appropriate python packages installed. By default, the script will train a CNN consisting of 2
+convolutional layers with 32 channels each and two fully connected layers with 16 nodes each. Models are built using
+the GenericNet class in the ./models folder. A CNN with different parameters can be trained by defining a dictionary
+following the format in utils.train.load_default_model_params(). The default parameters dictionary is defined as -  
+
+        model_params['conv_depths'] = [32,32]
+        model_params['fc_depths'] = [16,16]
+        model_params['conv_pool'] = [True, False]
+
+Each entry in 'conv_depths' and 'fc_depths' specifies the channel dimension, with one layer resulting for each entry.
+The 'conv_pool' entry specifies whether or not to pool after each convolutional layer. For further customization with
+the GenericNet class see models/genericnet.py. Alternatively, any arbitrary keras model can be used by replacing the
+'model' variable, provided input and output dimensions are consistent. In order to change the dataset, replace the
+load_data() function in train_cnn.py and update the 'input_shape' and 'num_classes' variables. The 'sf_list' variable
+defines the smoothing parameters that will be applied. The outer training loop controls which traits will be enforced,
+resulting in one training run per trait per smoothing factor.
+
 
 
 The functions for analyzing the CNN similarities are under 'communication_game/utils/similarity_analysis.py'.
