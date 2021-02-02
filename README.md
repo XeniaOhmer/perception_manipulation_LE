@@ -14,17 +14,16 @@ results and analyses presented in the paper.
 
 ## Data 
 
-We use the 3d shapes data set (Burgess & Kim, 2018), which you can download [here](https://console.cloud.google.com/storage/browser/3d-shapes;tab=objects?prefix=&forceOnObjectsSortingFiltering=false]).
-Place the '3dshapes.h5' file in the folder 'data'.
-
-## CNN training 
-
-For CNN training in default mode, download data using
+We use the 3d shapes data set (Burgess & Kim, 2018), which you can download using
 
     wget https://storage.cloud.google.com/3d-shapes/3dshapes.h5
 
-or go to https://github.com/deepmind/3d-shapes and follow the instructions from there. Provided the file '3dshapes.h5'
-is in the main directory with the train_cnn.py file, the default training experiments can be run by calling
+or from [here](https://console.cloud.google.com/storage/browser/3d-shapes;tab=objects?prefix=&forceOnObjectsSortingFiltering=false]).
+
+
+## CNN training 
+
+Provided the file '3dshapes.h5' is in the main directory with the train_cnn.py file, the default training experiments can be run by calling
 train_cnn.py without arguments, i.e. by running
 
 python train_cnn.py
