@@ -92,8 +92,7 @@ class Receiver(BaseAgent):
                                        vision_module, VtoH_activation=activation)
         self.n_distractors = n_distractors
         self.image_dim = image_dim
-        self.language_module = Sequential([layers.Embedding(vocab_size, embed_dim, mask_zero=True,
-                                                            name='embedding'),
+        self.language_module = Sequential([layers.Embedding(vocab_size, embed_dim, name='embedding'),
                                            layers.GRU(hidden_dim, name='GRU_layer')]) # GRU linear by default
         self.__build()
 
