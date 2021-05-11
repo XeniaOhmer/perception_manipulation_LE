@@ -31,7 +31,6 @@ def get_stats(name, vocab_size, message_length, path, mode, n_vision, n_runs=1):
         except: 
             print('not included', name, run)
             continue
-
     return rewards, val_rewards, eval_dicts, message_dicts
 
 
@@ -40,6 +39,7 @@ def groundedness_dataframe(names, vocab_size, message_length, path='3Dshapes_sub
     run_names = []
     features = []
     groundedness = []
+    positional_groundedness = []
     relevant_keys = ['color_groundedness', 'scale_groundedness', 'shape_groundedness']
 
     for name_idx, name in enumerate(names):  
@@ -72,8 +72,9 @@ def groundedness_dataframe(names, vocab_size, message_length, path='3Dshapes_sub
                     f = 'size'
                 features.append(f)
                 groundedness.append(evals[run]['bosground'][key])
+                positional_groundedness.append(evals[run]['posground'][key])
 
-    d = {'bias': run_names, 'feature': features, 'G_f': groundedness}
+    d = {'bias': run_names, 'feature': features, 'G_f': groundedness, 'Pos_G_f':positional_groundedness}
     df = pd.DataFrame(data=d)
     return df
 
@@ -104,7 +105,6 @@ def show_results_multiples(names, vocab_size, message_length, ylim=(0.8, 1.01), 
         final_R_train = mean_R_train[-1]
         final_R_val = np.mean([R for R in val_rewards], axis=0)[-1]
 
-        topsim = np.mean([evals[i]['topsim_attributes_messages'] for i in range(len(evals))])   
         if 'zero_shot' in name or 'zs' in name:  
             zero_shot = np.mean([evals[i]['zero_shot_reward'] for i in range(len(evals))])
             zs = True
@@ -117,7 +117,7 @@ def show_results_multiples(names, vocab_size, message_length, ylim=(0.8, 1.01), 
         title = str(name) + '\ntrain: ' + str(round(final_R_train, 3)) + ', val: ' + str(round(final_R_val, 3))
 
         if message_length > 1:
-            title = title + '\ntopsim: ' + str(round(topsim, 3))
+            title = title 
         if zs: 
             if message_length > 1:
                 title = title + ', R zs: ' + str(round(zero_shot, 3))
@@ -188,7 +188,6 @@ def show_results(names, vocab_size, message_length, ylim=(0.8, 1.01), path='3Dsh
         else:
             final_R_val = evals[0]['val_reward']
 
-        topsim = np.mean([evals[i]['topsim_attributes_messages'] for i in range(len(evals))])   
         if 'zero_shot' in name or 'zs' in name: 
             zero_shot = np.mean([evals[i]['zero_shot_reward'] for i in range(len(evals))])
             zs = True
@@ -201,7 +200,7 @@ def show_results(names, vocab_size, message_length, ylim=(0.8, 1.01), path='3Dsh
         title = str(name) + '\nR train: ' + str(round(final_R_train,3)) + ', R val: ' + str(round(final_R_val, 3))
         
         if message_length > 1:
-            title = title + '\ntopsim: ' + str(round(topsim, 3))
+            title = title
         if zs: 
             if message_length > 1:
                 title = title + ', R zs: ' + str(round(zero_shot, 3))
@@ -409,9 +408,9 @@ def show_acquisition_speed(names, vocab_size, message_length, thresholds = [0.87
 
             path_tmp = path + mode + '/' + name + '/vs' + str(vocab_size) + '_ml' + str(message_length)
 
-            rewards = np.load(path_tmp + '/reward.npy')[1::2]
+            rewards = np.load(path_tmp + '/reward.npy')
             try:
-                val_rewards = np.load(path_tmp + '/val_reward.npy')[1::2]
+                val_rewards = np.load(path_tmp + '/val_reward.npy')
             except:
                 val_rewards = []
 
@@ -482,14 +481,6 @@ def ttests(name1, name2, vocab_size=4, message_length=3, path='3Dshapes_subset/'
     print("speed 0.87", round(ttest_speed[0][1], 5))
     print("speed 0.90", round(ttest_speed[1][1], 5))
     print("speed 0.93", round(ttest_speed[2][1], 5))    
-
-    # topsim
-    topsim1 = [eval1[i]['topsim_attributes_messages'] for i in range(n_runs)]
-    topsim2 = [eval2[i]['topsim_attributes_messages'] for i in range(n_runs)]
-    print("topsim", round(ttest_ind(topsim1, topsim2)[1], 5))
-    topsim1 += [eval1_zs[i]['topsim_attributes_messages'] for i in range(n_runs)]
-    topsim2 += [eval2_zs[i]['topsim_attributes_messages'] for i in range(n_runs)]
-    print("topsim extended by values from zero-shot runs", round(ttest_ind(topsim1, topsim2)[1], 5))
     
     # zero-shot
     zs1 = [eval1_zs[i]['zero_shot_reward'] for i in range(n_runs)]
