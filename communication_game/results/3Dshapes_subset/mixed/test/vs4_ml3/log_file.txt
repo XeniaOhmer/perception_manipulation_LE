@@ -1,4 +1,0 @@
-INFO: 01/17/2021 05:47:07 epoch 0, shard 0, rewards train 0.5411403179168701, rewards val 0.6733583860759493
-INFO: 01/17/2021 05:50:12 epoch 0, shard 1, rewards train 0.6716256737709045, rewards val 0.6849287974683544
-INFO: 01/17/2021 05:53:39 epoch 1, shard 0, rewards train 0.7096630930900574, rewards val 0.7435172872340425
-INFO: 01/17/2021 05:57:18 epoch 1, shard 1, rewards train 0.758643627166748, rewards val 0.8098819813829787
