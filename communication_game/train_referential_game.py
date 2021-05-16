@@ -196,7 +196,6 @@ else:
                                                                  
 # load data
 (train_data, train_labels), (val_data, val_labels), _, _ = load_data((image_dim, image_dim, 3),
-                                                                     dataset='3D-shapes',
                                                                      balance_type=2)
 
 if zero_shot: 
@@ -275,7 +274,7 @@ np.save(path + 'val_reward.npy', all_val_reward)
 
 # get validation data and messages
 (train_data, train_labels), (val_data, val_labels), _, _ = load_data((image_dim, image_dim, 3),
-                                                                     dataset='3D-shapes', balance_type=2)
+                                                                      balance_type=2)
 
 if zero_shot:
     (train_data, train_labels), (zs_targets, zs_labels) = make_zero_shot_data(

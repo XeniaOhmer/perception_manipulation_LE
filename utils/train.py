@@ -102,10 +102,10 @@ def load_data(input_shape, normalize=True,
               output_samples=False,
               sample_dir='samples',
               data_path=None):
+
     meta = None
-    # data_path = '../data/3dshapes.h5'
-    if data_path == None:
-        data_path = '/net/store/cogmod/users/xenohmer/PycharmProjects/SimilarityGames/data/3dshapes.h5'
+    if data_path is None:
+        data_path = '../data/3dshapes.h5'
     
     dataset = h5py.File(data_path, 'r')
     data = dataset['images'][:]
