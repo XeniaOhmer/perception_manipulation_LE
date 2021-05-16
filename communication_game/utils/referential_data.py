@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def make_referential_data(data_set, n_distractors=2, zero_shot_categories=[], return_permutation=False):
+def make_referential_data(data_set, n_distractors=2, zero_shot_categories=[]):
     """ create sender and receiver training input for referential game, if zero shot is True, call
         make_zero_shot_data before. """
     
@@ -61,10 +61,7 @@ def make_referential_data(data_set, n_distractors=2, zero_shot_categories=[], re
 
     target_and_distractor_labels = [target_labels] + distractor_labels
     
-    if return_permutation: 
-        return targets_sender, receiver_input, referential_labels, target_and_distractor_labels, permutation
-    else: 
-        return targets_sender, receiver_input, referential_labels, target_and_distractor_labels
+    return targets_sender, receiver_input, referential_labels, target_and_distractor_labels
 
 
 def make_zero_shot_data(sender_data_orig, train_labels_orig, zero_shot_categories=[]):

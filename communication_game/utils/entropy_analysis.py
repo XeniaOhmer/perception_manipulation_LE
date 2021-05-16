@@ -1,13 +1,9 @@
 import numpy as np
 import tensorflow as tf
-import sys
 from communication_game.nn import agents
 from communication_game.utils.config import get_config, get_attribute_dict
-from sklearn.metrics import normalized_mutual_info_score as nmiscore
-from sklearn.metrics import mutual_info_score as miscore
 from utils.train import load_data
 from scipy.stats import entropy
-from communication_game.utils.referential_data import make_referential_data
 import pandas as pd
 
 dataset = '3Dshapes_subset'
@@ -25,16 +21,19 @@ def load_train():
     (data, labels), _, _, _ = load_data((64, 64, 3), balance_type=2, balance_traits=True)
     return data, labels
 
-def calc_entropy(X, base=None): 
+
+def calc_entropy(X, base=None):
     value, counts = np.unique(X, return_counts=True)
     return entropy(counts, base=base)
+
 
 def joint_entropy(X, Y, base=None):
     XY = np.array([str(X[i]) + str(Y[i]) for i in range(len(X))])
     value, counts = np.unique(XY, return_counts=True)
     return entropy(counts, base=base)
     
-def conditional_entropy(X, Y, base=None, normalizer='arithmetic'): 
+
+def conditional_entropy(X, Y, base=None, normalizer='marginal'):
     
     X_given_Y = joint_entropy(X, Y, base=base) - calc_entropy(Y, base=base)
     
@@ -49,11 +48,13 @@ def conditional_entropy(X, Y, base=None, normalizer='arithmetic'):
         
     return normalized_entropy
 
+
 def conditional_metric(X, Y, normalizer = 'joint'):
     return 1 - conditional_entropy(X, Y, normalizer=normalizer)
 
 
-def get_effectiveness(conditions=['default', 'color', 'scale', 'shape', 'all'], runs=10, normalizer='marginal', mode='basic'):
+def get_effectiveness(conditions=['default', 'color', 'scale', 'shape', 'all'], runs=10,
+                      normalizer='marginal', mode='basic'):
 
     data, labels = load_train()
     data = data[0:nsamples]
@@ -65,8 +66,7 @@ def get_effectiveness(conditions=['default', 'color', 'scale', 'shape', 'all'], 
     shape_labels = np.argmax(attributes[:, 8:12], axis=1) % 4
     
     all_results = {}
-    
-    
+
     for condition in conditions: 
         
         if '_' in condition: 
@@ -74,9 +74,7 @@ def get_effectiveness(conditions=['default', 'color', 'scale', 'shape', 'all'], 
         else: 
             mode = 'basic'
 
-        mi_scores = [[],[],[],[]]
-        effectiveness_scores = [[],[],[],[]]
-        efficiency_scores = [[],[],[],[]]
+        effectiveness_scores = [[], [], [], []]
     
         for i in range(runs):
 
@@ -85,8 +83,9 @@ def get_effectiveness(conditions=['default', 'color', 'scale', 'shape', 'all'], 
                     str(vocab_size) + '_ml' + str(message_length) + '/')
 
             cnn_sender = tf.keras.models.load_model(path_prefix + all_cnn_paths['default0-0'])
-            vision_module_sender = tf.keras.Model(inputs=cnn_sender.input, outputs=cnn_sender.get_layer('dense_1').output)
-            sender = agents.Sender(vocab_size, message_length, 128, 128, activation='tanh', vision_module=vision_module_sender)
+            vision_module_sender = tf.keras.Model(inputs=cnn_sender.input,
+                                                  outputs=cnn_sender.get_layer('dense_1').output)
+            sender = agents.Sender(vocab_size, message_length, 128, 128, vision_module_sender, activation='tanh')
 
             sender.load_weights(path + 'sender_weights_epoch149/')
                 
@@ -127,7 +126,6 @@ def get_residual_entropy(conditions=['default', 'all'], runs=10):
     shape_labels = np.argmax(attributes[:, 8:12], axis=1) % 4
     
     all_results = {}
-    residual_entropy = []
 
     for c, condition in enumerate(conditions): 
 
@@ -144,9 +142,9 @@ def get_residual_entropy(conditions=['default', 'all'], runs=10):
             path = (path_prefix + 'communication_game/results/' + result_path + mode + '/' + run + '/vs' +  
                     str(vocab_size) + '_ml' + str(message_length) + '/')
             cnn_sender = tf.keras.models.load_model(path_prefix + all_cnn_paths['default0-0'])
-            vision_module_sender = tf.keras.Model(inputs=cnn_sender.input, outputs=cnn_sender.get_layer('dense_1').output)
-            sender = agents.Sender(vocab_size, message_length, 128, 128, activation='tanh', 
-                                   vision_module=vision_module_sender)
+            vision_module_sender = tf.keras.Model(inputs=cnn_sender.input,
+                                                  outputs=cnn_sender.get_layer('dense_1').output)
+            sender = agents.Sender(vocab_size, message_length, 128, 128, vision_module_sender, activation='tanh')
 
             sender.load_weights(path + 'sender_weights_epoch149/')
 
@@ -154,7 +152,7 @@ def get_residual_entropy(conditions=['default', 'all'], runs=10):
             messages = np.array(messages[0][:])
             
             potential_re = []
-            for partition in [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]]:
+            for partition in [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]:
 
                 feature_wise_re = []
                 for f in range(3): 
@@ -197,6 +195,7 @@ def get_effectiveness_dataframes(entropy_both_biased, entropy_sender_biased, ent
         data['feature'] = features
         data['effectiveness'] = effectiveness
 
-        df = pd.DataFrame(data = data)
+        df = pd.DataFrame(data=data)
         all_dataframes.append(df)
+
     return all_dataframes
