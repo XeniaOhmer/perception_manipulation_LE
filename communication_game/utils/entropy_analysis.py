@@ -18,7 +18,8 @@ message_length = 3
 
 def load_train():
     """ load the training data""" 
-    (data, labels), _, _, _ = load_data((64, 64, 3), balance_type=2, balance_traits=True)
+    (data, labels), _, _, _ = load_data((64, 64, 3), balance_type=2, balance_traits=True,
+                                        data_path=path_prefix+'data/3dshapes.h5')
     return data, labels
 
 
