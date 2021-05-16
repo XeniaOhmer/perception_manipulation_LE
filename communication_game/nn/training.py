@@ -92,7 +92,7 @@ class Trainer:
                 zip(receiver_gradients, self.receiver.trainable_variables)
             )
 
-            rewards_epoch.append(tf.reduce_mean(rewards))
+            rewards_epoch.append(tf.reduce_mean(rewards_orig))
             sender_loss_epoch.append(tf.reduce_mean(sender_loss))
             receiver_loss_epoch.append(tf.reduce_mean(receiver_loss))
             message_length_epoch.append(tf.reduce_mean(message_length))
