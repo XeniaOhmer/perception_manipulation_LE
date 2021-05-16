@@ -256,7 +256,7 @@ for epoch in range(n_epochs):
     all_val_reward.append(val_reward)
     del val_dataset
 
-    logging.info("epoch {0}, rewards train {2}, rewards val {3}".format(epoch, rewards, val_reward))
+    logging.info("epoch {0}, rewards train {1}, rewards val {2}".format(epoch, rewards, val_reward))
 
 # store final agent models
 trainer.receiver.save_weights(path + 'receiver_weights_epoch' + str(epoch) + '/')
