@@ -67,7 +67,7 @@ def make_referential_data(data_set, n_distractors=2, zero_shot_categories=[], re
         return targets_sender, receiver_input, referential_labels, target_and_distractor_labels
 
 
-def make_zero_shot_data(sender_data_orig, train_labels_orig, zero_shot_categories=[], receiver_data_orig=None):
+def make_zero_shot_data(sender_data_orig, train_labels_orig, zero_shot_categories=[]):
     """ this is necessary if zero shot is True: call for training and validation set to remove all
         objects that should be withheld for testing """
     
@@ -80,12 +80,8 @@ def make_zero_shot_data(sender_data_orig, train_labels_orig, zero_shot_categorie
     train_labels = train_labels_orig[classical_indices]
     zero_shot_sender = sender_data_orig[zero_shot_indices]
     zero_shot_labels = train_labels_non_hot[zero_shot_indices]
-    if receiver_data_orig is not None: 
-        receiver_data = receiver_data_orig[classical_indices]
-        zero_shot_receiver = receiver_data_orig[zero_shot_indices]
-        return (sender_data, receiver_data, train_labels), (zero_shot_sender, zero_shot_receiver, zero_shot_labels)
-    else: 
-        return (sender_data, train_labels), (zero_shot_sender, zero_shot_labels)
+
+    return (sender_data, train_labels), (zero_shot_sender, zero_shot_labels)
 
 
 def make_zero_shot_referential_data(dataset, 
