@@ -134,7 +134,6 @@ def show_vision_modules_similarities(cnn_keys, n_examples=50, layer=1, plot=True
         vision = tf.keras.Model(inputs=vision.input, outputs=vision.get_layer(layer_name[layer]).output)
         
         val_data, val_labels, _ = load_data((64, 64, 3),
-                                            dataset='3D-shapes',
                                             analysis_run=True,
                                             balance_type=2,
                                             balance_traits=True)

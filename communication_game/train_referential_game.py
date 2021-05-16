@@ -272,6 +272,11 @@ np.save(path + 'val_reward.npy', all_val_reward)
 #############################################################
 # evaluate language with different metrics and store results
 
+del train_data
+del train_labels
+del val_data
+del val_labels
+
 # get validation data and messages
 (train_data, train_labels), (val_data, val_labels), _, _ = load_data((image_dim, image_dim, 3),
                                                                       balance_type=2)
