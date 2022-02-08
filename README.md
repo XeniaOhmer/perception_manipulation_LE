@@ -1,6 +1,6 @@
 # perception_manipulation_LE
 
-This code accompanies the anonymous submission 
+This code accompanies the submission 
 "Manipulating perception in artificial agents to study the effects on language emergence"
 to the Annual Meeting of the Cognitive Science Society 2021.
 
